@@ -1,10 +1,9 @@
 package com.dv.kotlin.chatapp.activities.login
 
-import android.content.Intent
 import android.os.Bundle
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.dv.kotlin.chatapp.R
+import com.dv.kotlin.chatapp.activities.*
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.android.synthetic.main.login_activity.*
 
@@ -16,41 +15,46 @@ class LoginActivity: AppCompatActivity(){
         super.onCreate( savedInstanceState )
         setContentView( R.layout.login_activity )
 
-        var email: String?
-        var pass: String?
-
         btnLogin.setOnClickListener {
 
-            email = edtEmail.text.toString()
-            pass = edtPass.text.toString()
+            val email = edtEmail.text.toString()
+            val pass = edtPass.text.toString()
 
-            if( isValidateLoginFields( email, pass ) ){
-                logIn( email!!, pass!! )
+            if( isValidEmail( email ) && isValidPassword( pass ) ){
+                logInByEmail( email, pass )
             } else {
-                Toast.makeText( this, "Please fill all the data is correct.", Toast.LENGTH_LONG ).show()
+                toast(  "Please make sure all the data is correct." )
             }
         }
-
+        txtForgotPass.setOnClickListener{
+            goToActivity<ForgotPasswordActivity>()
+            overridePendingTransition( android.R.anim.slide_in_left, android.R.anim.slide_out_right )
+        }
         btnSignUp.setOnClickListener {
-            val intent = Intent( this, SignUpActivity::class.java )
-            startActivity( intent )
+            goToActivity<SignUpActivity>()
+            overridePendingTransition( android.R.anim.slide_in_left, android.R.anim.slide_out_right )
+        }
+        edtEmail.validate {
+            edtEmail.error = if( isValidEmail( it )) null else "The email is not valid."
+        }
+        edtPass.validate {
+            edtPass.error = if( isValidPassword( it )) null else "The password should contain 1 lowercase, 1 uppercase, 1 number 1 special character at least."
         }
 
     }
 
-    private fun logIn( email: String, pass: String ){
+    private fun logInByEmail( email: String, pass: String ){
         mAuth.signInWithEmailAndPassword( email, pass )
             .addOnCompleteListener( this ){
                 if( it.isSuccessful ){
-                    Toast.makeText( this, "Welcome", Toast.LENGTH_LONG ).show()
+                    if( mAuth.currentUser!!.isEmailVerified ){
+                        toast( "User is now logged in." )
+                    } else {
+                        toast( "User must confirm email first." )
+                    }
                 } else {
-                    Toast.makeText( this, "An unexpected error ocurred. Check the data and try again.", Toast.LENGTH_LONG ).show()
+                    toast("An unexpected error occurred. Try again." )
                 }
             }
-    }
-
-    private fun isValidateLoginFields( email: String?, pass: String? ): Boolean{
-        return !email.isNullOrEmpty() &&
-                !pass.isNullOrEmpty()
     }
 }
