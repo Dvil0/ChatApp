@@ -101,7 +101,13 @@ class LoginActivity: AppCompatActivity(){
         val credential = GoogleAuthProvider.getCredential( gAccount.idToken, null )
         mAuth.signInWithCredential( credential )
             .addOnCompleteListener {
-                toast( "Sign In by Google." )
+                val signIn = GoogleSignIn.getLastSignedInAccount( this )
+                if( signIn != null ){
+                    getGoogleSignInClient().signOut()
+                }
+                goToActivity<MainActivity>{
+                    flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                }
             }
     }
 }
