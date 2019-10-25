@@ -65,7 +65,9 @@ class LoginActivity: AppCompatActivity(){
             .addOnCompleteListener( this ){
                 if( it.isSuccessful ){
                     if( mAuth.currentUser!!.isEmailVerified ){
-                        toast( "User is now logged in." )
+                        goToActivity<MainActivity>{
+                            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                        }
                     } else {
                         toast( "User must confirm email first." )
                     }
